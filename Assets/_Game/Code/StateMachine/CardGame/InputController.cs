@@ -9,6 +9,8 @@ public class InputController : MonoBehaviour
     public event Action PressedCancel = delegate { };
     public event Action PressedLeft = delegate { };
     public event Action PressedRight = delegate { };
+    //
+    public event Action PressedMouseOne = delegate { };
 
     void Update()
     {
@@ -16,6 +18,14 @@ public class InputController : MonoBehaviour
         DetectCancel();
         DetectLeft();
         DetectRight();
+        DetectMouseOne();
+    }
+    private void DetectMouseOne() 
+    {
+        if (Input.GetMouseButtonDown(0)) 
+        {
+            PressedMouseOne?.Invoke();
+        }
     }
     private void DetectRight() 
     {

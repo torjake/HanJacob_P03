@@ -8,6 +8,8 @@ public class PlayerTurnCardGameState : CardGameState
 
     public static event Action PlayerTurnBegan;
     public static event Action PlayerTurnEnded;
+
+    public static event Action PlayerAttack;
     //
     int _currentCard = 1;
     int _numberOfCards = 3;
@@ -16,8 +18,21 @@ public class PlayerTurnCardGameState : CardGameState
     [SerializeField] GameObject _winCard = null;
     [SerializeField] GameObject _SkipCard = null;
     [SerializeField] GameObject _cardManager = null;
-    
+    //
+    public float _playerHealth = 10;
+    //
+    public GameObject _attackMarker;
+    public GameObject _defendMarker;
+    public GameObject _healMarker;
+    //private EnemyTurnCardGameState _enem;
 
+    bool _isDefending;
+    private void Start()
+    {
+        //_enem = GetComponent<EnemyTurnCardGameState>();
+        //_enem.Attack += TakeDamage();
+        EnemyTurnCardGameState.AttackPlayer += TakeDamage;
+    }
     public override void Enter()
     {
         print("Player Turn: ...Entering");
@@ -30,6 +45,7 @@ public class PlayerTurnCardGameState : CardGameState
         StateMachine.Input.PressedConfirm += OnPressedConfirm;
         StateMachine.Input.PressedLeft += LeftPress;
         StateMachine.Input.PressedRight += RightPress;
+        StateMachine.Input.PressedMouseOne += LeftMousePressed;
     }
     public override void Exit()
     {
@@ -41,8 +57,35 @@ public class PlayerTurnCardGameState : CardGameState
         StateMachine.Input.PressedConfirm -= OnPressedConfirm;
         StateMachine.Input.PressedLeft -= LeftPress;
         StateMachine.Input.PressedRight -= RightPress;
+        StateMachine.Input.PressedMouseOne -= LeftMousePressed;
+        //
 
         print("Player Turn: Exiting...");
+    }
+    void TakeDamage() 
+    {
+        if (_isDefending == false)
+        {
+            _playerHealth -= 3;
+        }
+        else 
+        {
+            _playerHealth += 1;
+            _isDefending = false;
+        }
+        //
+    }
+    void LeftMousePressed() 
+    {
+        /*
+        Ray _myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit _cardHitInfo;
+
+        if (Physics.Raycast(_myRay, out _cardHitInfo, 100)) 
+        {
+            
+        }
+        */
     }
     void LeftPress() 
     {
@@ -70,29 +113,59 @@ public class PlayerTurnCardGameState : CardGameState
     }
     void OnPressedConfirm() 
     {
-        if(_currentCard == 1)
-            StateMachine.ChangeState<LoseStateCardGame>();
-
-        if (_currentCard == 2)
-            StateMachine.ChangeState<WinStateCardGame>();
-
-        if (_currentCard == 3)
+        //
+        if (_currentCard == 1) 
+        {
+            _isDefending = false;
+            PlayerAttack?.Invoke();
             StateMachine.ChangeState<EnemyTurnCardGameState>();
+            
+        }
+        //StateMachine.ChangeState<LoseStateCardGame>();
+
+        if (_currentCard == 2) 
+        {
+            _isDefending = true;
+            StateMachine.ChangeState<EnemyTurnCardGameState>();
+        }
+        //StateMachine.ChangeState<WinStateCardGame>();
+
+        if (_currentCard == 3) 
+        {
+            _isDefending = false;
+            _playerHealth += 1;
+            StateMachine.ChangeState<EnemyTurnCardGameState>();
+        }
+            //StateMachine.ChangeState<EnemyTurnCardGameState>();
     }
 
     private void Update()
     {
         if (_currentCard == 1) 
         {
-            print("Lose Card Selected");
+            //attack
+            _attackMarker.SetActive(true);
+            _defendMarker.SetActive(false);
+            _healMarker.SetActive(false);
         }
         if (_currentCard == 2)
         {
-            print("Win Card Selected");
+            //defend
+            _attackMarker.SetActive(false);
+            _defendMarker.SetActive(true);
+            _healMarker.SetActive(false);
         }
         if (_currentCard == 3)
         {
-            print("Skip Card Selected");
+            //heal
+            _attackMarker.SetActive(false);
+            _defendMarker.SetActive(false);
+            _healMarker.SetActive(true);
+        }
+        //
+        if (_playerHealth <= 0)
+        {
+            StateMachine.ChangeState<LoseStateCardGame>();
         }
     }
 }

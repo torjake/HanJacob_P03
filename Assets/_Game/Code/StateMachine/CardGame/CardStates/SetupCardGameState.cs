@@ -12,9 +12,7 @@ public class SetupCardGameState : CardGameState
 
     public override void Enter()
     {
-        print("Setup: ...Entering");
-        print("Creating " + _numberOfPlayers + " players.");
-        print("Creating deck with " + _startingCardNumber + " cards.");
+       
         // Cant change state while still in Enter() /Exit() transition
         // Dont put ChangeState<> here
         _activated = false;
@@ -26,6 +24,8 @@ public class SetupCardGameState : CardGameState
         if (_activated == false)
         {
             _activated = true;
+            GetComponent<PlayerTurnCardGameState>()._playerHealth = 10;
+            GetComponent<EnemyTurnCardGameState>()._enemyHealth = 10;
             StateMachine.ChangeState<PlayerTurnCardGameState>();
         }
     }
